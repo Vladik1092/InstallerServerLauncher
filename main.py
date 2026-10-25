@@ -7,6 +7,23 @@ import subprocess
 import threading
 import time
 import urllib.request
+import os
+import certifi
+
+#Фикс бага с сертификатом
+if getattr(sys, 'frozen', False):
+    # Если мы внутри .exe, ищем сертификат во временной папке распаковки
+    base_path = sys._MEIPASS
+    cacert_path = os.path.join(base_path, 'certifi', 'cacert.pem')
+
+    # Если файл там есть, используем его
+    if os.path.exists(cacert_path):
+        os.environ['SSL_CERT_FILE'] = cacert_path
+        os.environ['REQUESTS_CA_BUNDLE'] = cacert_path
+else:
+    # Если запускаем просто .py файл, используем стандартный путь certifi
+    os.environ['SSL_CERT_FILE'] = certifi.where()
+    os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
 
 # Настройки установщика
 APP_NAME = "ZOMBIE IS-25-05 Launcher"
