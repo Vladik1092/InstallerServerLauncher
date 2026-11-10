@@ -30,7 +30,7 @@ APP_NAME = "ZOMBIE IS-25-05 Launcher"
 APP_VERSION = "1.1"
 INSTALL_DIR = os.path.join(os.getenv('LOCALAPPDATA'), "ZombieLauncher")
 
-LAUNCHER_URL = "https://github.com/Vladik1092/ServerLauncher/releases/download/v1.1/launcher.exe"
+LAUNCHER_URL = "https://github.com/Vladik1092/ServerLauncher/releases/download/v1.2/launcher.exe"
 
 # Цвета
 COLOR_BG = "#1e1e1e"
