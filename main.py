@@ -1,3 +1,4 @@
+import ctypes
 import os
 import sys
 import shutil
@@ -9,6 +10,7 @@ import time
 import urllib.request
 import os
 import certifi
+import ctypes
 
 #Фикс бага с сертификатом
 if getattr(sys, 'frozen', False):
@@ -138,7 +140,6 @@ class InstallProgressWindow:
             self.update_progress(0, "Подключение к серверу GitHub...")
             self.download_file(LAUNCHER_URL, launcher_dst)
 
-            # Копируем иконку из установщика
             self.update_progress(90, "Создание ярлыка...")
             if getattr(sys, 'frozen', False):
                 base_dir = sys._MEIPASS
@@ -148,11 +149,20 @@ class InstallProgressWindow:
             src_icon = os.path.join(base_dir, "icon.ico")
             icon_dst = os.path.join(INSTALL_DIR, "icon.ico")
             if os.path.exists(src_icon):
+                if os.path.exists(icon_dst):
+                    os.remove(icon_dst)
                 shutil.copy2(src_icon, icon_dst)
 
             desktop = os.path.join(os.environ['USERPROFILE'], 'Desktop')
             shortcut_path = os.path.join(desktop, f"{APP_NAME}.lnk")
-            create_shortcut(launcher_dst, shortcut_path, icon_dst if os.path.exists(icon_dst) else "")
+
+            if os.path.exists(shortcut_path):
+                os.remove(shortcut_path)
+
+            icon_target = f"{icon_dst},0" if os.path.exists(icon_dst) else f"{launcher_dst},0"
+            create_shortcut(launcher_dst, shortcut_path, icon_target)
+
+            refresh_windows_icons()
 
             self.update_progress(100, "Установка завершена!")
             time.sleep(1)
@@ -178,6 +188,16 @@ def start_installation(root, btn_install, agree_check):
             agree_check.config(state=tk.NORMAL)
 
     InstallProgressWindow(root, on_finish)
+
+def refresh_windows_icons():
+    try:
+        SHCNE_ASSOCCHANGED = 0x08000000
+        SHCNF_IDLIST = 0x0000
+        ctypes.windll.shell32.SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, None, None)
+
+        subprocess.run(["ie4uinit.exe", "-show"], capture_output=True)
+    except Exception:
+        pass
 
 
 def main():
